@@ -1,0 +1,218 @@
+      *****************************************************************
+      * Program name:    C0001
+      * Original author: JONATHAN CAMACHO
+      *
+      * Maintenence Log
+      * Date      Author        Maintenance Requirement
+      * --------- ------------  ---------------------------------------
+      * 01/01/08 JONATHAN CAMACHO  Created for COBOL class
+      *
+      *****************************************************************
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.  C0001.
+       AUTHOR. JONATHAN CAMACHO.
+       INSTALLATION. COBOL DEVELOPMENT CENTER.
+       DATE-WRITTEN. 01/01/08.
+       DATE-COMPILED. 01/01/08.
+       SECURITY. NON-CONFIDENTIAL.
+      *****************************************************************
+      *****************************************************************
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SOURCE-COMPUTER. IBM-3081.
+       OBJECT-COMPUTER. IBM-3081.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL. 
+           SELECT MIFILE ASSIGN TO INFILEDD.
+      *****************************************************************
+      *****************************************************************
+       DATA DIVISION.
+       FILE SECTION.
+       FD  MIFILE
+            RECORD CONTAINS 170 CHARACTERS
+            RECORDING MODE IS F 
+            BLOCK CONTAINS 0 RECORDS.
+       01  MIFILE-REG PIC X(170). 
+      *****************************************************************
+       WORKING-STORAGE SECTION.
+      *COPYS, QUE POR LO QUE SEA ME MARCA ERROR PERO NO ES ASI
+      * COPY USUARIO.
+      *Pongo las variables de la copy aqui para no ver todo lleno de err
+       01  W-DATOS-PERSONA.
+           05 NOMBRE               PIC X(12) VALUE SPACES.
+           05 PRIMER-APELLIDO      PIC X(15) VALUE SPACES.
+           05 SEGUNDO-APELLIDO     PIC X(15) VALUE SPACES.
+           05 PATRIMONIO           PIC *********9.
+           05 EDAD                 PIC 9(3)   VALUE ZEROS.
+           05 FECHA-NACIMIENTO.
+              10 DIA               PIC 9(2)  VALUE ZEROS.
+              10 FILLER            PIC X     VALUE "/".
+              10 MES               PIC 9(2)  VALUE ZEROS.
+              10 FILLER            PIC X     VALUE "/".
+              10 ANIO              PIC 9(4)  VALUE ZEROS.
+
+      *FECHA ACTUAL
+       01  CD-CURRENT-DATE.
+           05 CD-DIA            PIC 9(2)     VALUE ZEROS.
+           05 CD-MES            PIC 9(2)     VALUE ZEROS.
+           05 CD-ANIO           PIC 9(4)     VALUE ZEROS.
+
+      *NUMERO RANDOM
+       77  RANDOM-NUMBER        PIC 9(4) COMP-3 VALUE ZEROS.
+
+      *VARIABLES CONDICIONALES
+       01  W-MAYOR-DE-EDAD      PIC X         VALUE 'N'.
+           88 MAYOR-DE-EDAD                   VALUE 'S'.
+      *INDICES
+       77  INDICE               PIC 9(4) COMP-3 VALUE ZEROS.
+      *VARIABLES PARA GUARDAR DATOS ACCEPT
+       01  W-VAR1               PIC 9(3) VALUE ZEROS.
+       01  W-VAR2               PIC 9(3) VALUE ZEROS.
+       01  W-RESULTADO          PIC 9(6) VALUE ZEROS.
+      *VARIABLES PARA EL FICHERO
+       01 COUNTERS-AND-ACCUMULATORS.
+           05 REC-COUNTER       PIC S9(4) COMP-3.
+       01 INFILE-EOF            PIC X    VALUE 'N'.
+           88 INFILE-EOF-SI              VALUE 'S'.
+           88 INFILE-EOF-NO              VALUE 'N'.
+      *****************************************************************
+       PROCEDURE DIVISION.
+      *
+      *METEMOS TODO EN METODOS
+      *
+           PERFORM INICIALIZAR-VARIABLES.
+           PERFORM MOSTRAR-VARIABLES.
+      *FICHEROS
+           PERFORM INICIO-FICHERO.
+           PERFORM PROCESO-FICHERO.
+
+
+           PERFORM FIN-PROGRAMA.
+
+      *---------------------*
+       INICIALIZAR-VARIABLES.
+      *---------------------*
+      *
+      *RELLENAMOS LAS VARIABLES
+      *
+           PERFORM ACCEPT-DATOS.
+           
+           MOVE "PEPE"             TO NOMBRE.
+           MOVE "ORTEGA"           TO PRIMER-APELLIDO.
+           MOVE "PEREZ"            TO SEGUNDO-APELLIDO.
+           MOVE 2                  TO DIA MES.
+           MOVE 1990               TO ANIO.
+           MOVE 11869              TO PATRIMONIO.
+           MOVE 20                 TO EDAD.
+
+      *-----------------*
+       MOSTRAR-VARIABLES.
+      *-----------------*
+      *
+      *EJECUTAMOS ALGUNOS DATOS
+      *
+           DISPLAY "USUARIO: " NOMBRE PRIMER-APELLIDO SEGUNDO-APELLIDO.
+           DISPLAY "PATRIMONIO: " PATRIMONIO
+           DISPLAY "EDAD: " EDAD
+           DISPLAY "FECHA DE NACIMIENTO: "FECHA-NACIMIENTO.
+
+           PERFORM OPERACIONES.
+      *
+      *FECHA ACTUAL
+      *
+           MOVE FUNCTION CURRENT-DATE(1:8) TO CD-CURRENT-DATE.
+           DISPLAY "FECHA ACTUAL: " CD-CURRENT-DATE.
+      *
+      *RANDOM NUMBER
+      *
+           COMPUTE RANDOM-NUMBER = FUNCTION RANDOM * 52 + 1.
+           DISPLAY "NUMERO RANDOM: " RANDOM-NUMBER.
+      *
+      *CONDICIONES IF-ELSE Y EVALUATE
+      *
+           IF EDAD > 18
+              MOVE 'S' TO W-MAYOR-DE-EDAD
+              DISPLAY "ES MAYOR DE EDAD"
+           ELSE
+              MOVE 'N' TO W-MAYOR-DE-EDAD
+              DISPLAY "ES MENOR DE EDAD"
+           END-IF.
+
+           EVALUATE W-MAYOR-DE-EDAD
+              WHEN 'S'
+                 DISPLAY "ES MAYOR DE EDAD"
+              WHEN 'N'
+                 DISPLAY "ES MENOR DE EDAD"
+              WHEN OTHER
+                 DISPLAY "HA PASADO ALGO, REPASA EL CODIGO"
+           END-EVALUATE.
+
+           PERFORM BUCLE.
+
+       BUCLE.
+      *
+      *BUCLE CON INICIALIZACION
+      *
+           INITIALIZE INDICE.
+           PERFORM VARYING INDICE FROM 1 BY 1 UNTIL INDICE = EDAD
+              DISPLAY "BUCLE CUENTA " INDICE
+           END-PERFORM.
+           DISPLAY "HASTA LOS " INDICE.
+
+       ACCEPT-DATOS. 
+      *
+      *ACEPTACION DE DATOS CON ACCEPT
+      *
+           ACCEPT   W-VAR1.
+           ACCEPT   W-VAR2.
+
+       OPERACIONES.
+      *
+      *TODAS LAS OPERACIONES
+      *
+           ADD W-VAR1 W-VAR2 TO W-RESULTADO.
+           DISPLAY "LA SUMA DE LOS DATOS PASADOS ES: " W-RESULTADO.
+           SUBTRACT W-VAR2 FROM W-VAR1 GIVING W-RESULTADO.
+           DISPLAY "LA RESTA DE LOS DATOS PASADOS ES: " W-RESULTADO.
+           MULTIPLY W-VAR1 BY W-VAR2 GIVING W-RESULTADO.
+           DISPLAY "LA MULTIPLICACION ES: " W-RESULTADO.
+           DIVIDE W-VAR1 BY W-VAR2 GIVING W-RESULTADO.
+           DISPLAY "LA DIVISION DE LOS DATOS PASADOS ES: " W-RESULTADO.
+           COMPUTE W-RESULTADO = W-VAR1 + W-VAR2 + W-RESULTADO.
+           DISPLAY "USANDO EL COMPUTE: " W-RESULTADO.
+
+      *--------------*
+       INICIO-FICHERO.
+      *--------------*
+
+           OPEN INPUT MIFILE.
+           INITIALIZE COUNTERS-AND-ACCUMULATORS.
+
+
+      *---------------*
+       PROCESO-FICHERO.
+      *---------------*
+           PERFORM LEER-REGISTRO UNTIL INFILE-EOF-SI.
+
+
+
+       LEER-REGISTRO.
+           READ MIFILE
+              AT END
+                 SET INFILE-EOF-SI TO TRUE 
+              NOT AT END
+                 ADD 1 TO REC-COUNTER
+                 PERFORM PROCESAR-REGISTRO
+           END-READ.
+
+
+       PROCESAR-REGISTRO.
+           
+           DISPLAY REC-COUNTER MIFILE-REG.
+
+           
+      *------------*
+       FIN-PROGRAMA.
+      *------------*
+           DISPLAY "Acabamos el programa con un stop run."
+           STOP RUN.
